@@ -15,38 +15,47 @@ export const useAuth = () => useContext(AuthContext)
 
 export default function AuthContextProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-    //   setCurrentUser(session?.user)
-    //   console.log(session?.user)
-    // })
-    // return () => {
-    //   listener?.subscription.unsubscribe()
-    // }
-
-    const setData = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      setSession(session)
-      setCurrentUser(session?.user)
-      setLoading(false);
-    };
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setCurrentUser(session?.user)
-      setLoading(false)
-    });
-
-    setData();
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      session != undefined ? setCurrentUser((current) => (current?.id == session?.user.id) ? current : session.user) : setCurrentUser(null)
+      // setCurrentUser(session?.user)
+    })
 
     return () => {
-      listener?.subscription.unsubscribe();
-    };
+      listener?.subscription.unsubscribe()
+    }
   }, [])
+
+  // useEffect(() => {
+  //   // const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+  //   //   setCurrentUser(session?.user)
+  //   //   console.log(session?.user)
+  //   // })
+  //   // return () => {
+  //   //   listener?.subscription.unsubscribe()
+  //   // }
+
+  //   const setData = async () => {
+  //     const { data: { session }, error } = await supabase.auth.getSession();
+  //     if (error) throw error;
+  //     setSession(session)
+  //     setCurrentUser(session?.user)
+  //     setLoading(false);
+  //   };
+
+  //   const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+  //     setSession(session);
+  //     setCurrentUser(session?.user)
+  //     setLoading(false)
+  //   });
+
+  //   setData();
+
+  //   return () => {
+  //     listener?.subscription.unsubscribe();
+  //   };
+  // }, [])
 
   useEffect(() => {
     console.log('The user is', currentUser)

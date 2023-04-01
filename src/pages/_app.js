@@ -1,10 +1,13 @@
 import '@/styles/globals.css'
 import { ChakraProvider } from '@chakra-ui/react'
+import AuthContextProvider from '../../contexts/AuthContext'
 
 export default function App({ Component, pageProps }) {
   return (
     <ChakraProvider>
-      <Component {...pageProps} />
+      <AuthContextProvider>
+        <Component {...pageProps} />
+      </AuthContextProvider>
     </ChakraProvider>
   )
 }

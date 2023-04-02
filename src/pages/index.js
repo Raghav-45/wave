@@ -28,7 +28,7 @@ export default function Home() {
 
   return (<>
     <VStack px={5} pt={48} pb={14} spacing={2}>
-      !window.matchMedia('(display-mode: standalone)').matches && <Button width={'full'} colorScheme='blue' variant='solid'>please install pwa</Button>
+      {!window.matchMedia('(display-mode: standalone)').matches && <Button width={'full'} colorScheme='blue' variant='solid'>please install pwa</Button>}
       <Button onClick={() => router.push('/login')} width={'full'} colorScheme='blue' variant='solid'>Login</Button>
       <Button onClick={() => router.push('/register')} width={'full'} colorScheme='blue' variant='outline'>Register</Button>
       {currentUser && <Button onClick={async () => await supabase.auth.signOut()} width={'full'} colorScheme='blue' variant='outline'>Logout</Button>}

@@ -5,6 +5,10 @@ import { useRouter } from 'next/router'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function Home() {
+
+const relatedApps = await navigator.getInstalledRelatedApps();
+const PWAisInstalled = relatedApps.length > 0;
+
   const router = useRouter()
   const { currentUser } = useAuth()
   // const [currentUser, setCurrentUser] = useState()
@@ -27,6 +31,7 @@ export default function Home() {
   }, [currentUser])
 
   return (<>
+PWAisInstalled && <Button>pwa</Button>
     <VStack px={5} pt={48} pb={14} spacing={2}>
       <Button onClick={() => router.push('/login')} width={'full'} colorScheme='blue' variant='solid'>Login</Button>
       <Button onClick={() => router.push('/register')} width={'full'} colorScheme='blue' variant='outline'>Register</Button>

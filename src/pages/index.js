@@ -31,7 +31,7 @@ const PWAisInstalled = relatedApps.length > 0;
   }, [currentUser])
 
   return (<>
-PWAisInstalled && <Button>pwa</Button>
+{PWAisInstalled && <Button>pwa</Button>}
     <VStack px={5} pt={48} pb={14} spacing={2}>
       <Button onClick={() => router.push('/login')} width={'full'} colorScheme='blue' variant='solid'>Login</Button>
       <Button onClick={() => router.push('/register')} width={'full'} colorScheme='blue' variant='outline'>Register</Button>

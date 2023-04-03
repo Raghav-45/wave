@@ -41,7 +41,7 @@ export default function Home() {
       </Flex>
 
       {/* <Chat DisplayName={'Raghav'} Username={'raghav_aditya_45'} PhotoURL={'https://i.pinimg.com/564x/66/4e/7f/664e7ffc5187ce22defefce46e60788e.jpg'} isCloseFriend={true} /> */}
-      {isUserListLoading ? <HStack justify={'center'} width={'100%'} pt={'15px'}><Text>Loading chats...</Text><Spinner height={'3'} width={'3'} color='#0071FF' /></HStack> : userList.map((elem) => elem.id != currentUser.id && <Chat Username={elem?.username} />)}
+      {isUserListLoading ? <HStack justify={'center'} width={'100%'} pt={'15px'}><Text>Loading chats...</Text><Spinner height={'3'} width={'3'} color='#0071FF' /></HStack> : userList.map((elem) => elem.id != currentUser.id && <Chat DisplayName={elem?.username.charAt(0).toUpperCase() + elem?.username.slice(1)} Username={elem?.username} />)}
     </Box>
   )
 }

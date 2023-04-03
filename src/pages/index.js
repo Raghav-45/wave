@@ -8,7 +8,7 @@ import { FiSearch } from 'react-icons/fi'
 
 export default function Home() {
   const router = useRouter()
-  const { currentUser } = useAuth()
+  const { currentUser, logout } = useAuth()
   // const [currentUser, setCurrentUser] = useState()
   const [userList, setUserList] = useState()
   const [isUserListLoading, setIsUserListLoading] = useState(true)
@@ -36,12 +36,12 @@ export default function Home() {
           </Box>
         </Flex>
         <Flex height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' rounded={'full'} overflow={'hidden'} ml={'8px'}>
-          <Image src={'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'} alt='' objectFit='cover' />
+          <Image onClick={() => logout()} src={currentUser?.user_metadata?.photo_url ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'} alt='' objectFit='cover' />
         </Flex>
       </Flex>
 
       {/* <Chat DisplayName={'Raghav'} Username={'raghav_aditya_45'} PhotoURL={'https://i.pinimg.com/564x/66/4e/7f/664e7ffc5187ce22defefce46e60788e.jpg'} isCloseFriend={true} /> */}
-      {isUserListLoading ? <HStack justify={'center'} width={'100%'} pt={'15px'}><Text>Loading chats...</Text><Spinner height={'3'} width={'3'} color='#0071FF' /></HStack> : userList.map((elem) => elem.id != currentUser.id && <Chat DisplayName={elem?.username.charAt(0).toUpperCase() + elem?.username.slice(1)} Username={elem?.username} />)}
+      {isUserListLoading ? <HStack justify={'center'} width={'100%'} pt={'15px'}><Text>Loading chats...</Text><Spinner height={'3'} width={'3'} color='#0071FF' /></HStack> : currentUser && userList.map((elem) => elem.id != currentUser?.id && <Chat DisplayName={elem?.username.charAt(0).toUpperCase() + elem?.username.slice(1)} Username={elem?.username} />)}
     </Box>
   )
 }

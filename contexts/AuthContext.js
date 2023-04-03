@@ -19,7 +19,7 @@ export default function AuthContextProvider({ children }) {
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       session != undefined ? setCurrentUser((current) => (current?.id == session?.user.id) ? current : session.user) : setCurrentUser(null)
-      // setCurrentUser(session?.user)
+      console.log('Session Change', session)
     })
 
     return () => {

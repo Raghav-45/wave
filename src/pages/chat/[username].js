@@ -102,7 +102,7 @@ export default function ChatPage () {
   return (<>
     {/* <Text width={'100%'} textAlign={'center'} pt={'15px'} fontSize={'14px'} lineHeight={'14px'} color={'#6B7280'}>Here You Will see your messages with @{connection_id}</Text> */}
 
-    <Container maxW='container.lg' position={'fixed'} height={'100%'} px={2} pt={'10'} pb={'64px'}>
+    <Container maxW='container.lg' position={'fixed'} height={'100%'} px={2} pb={'64px'}>
       <Flex height={'100%'} direction={'column'} overflowY={'scroll'}>
         <Spacer />
         {chats && SortByTime(chats).map((elem) => <Message key={elem.id} Message={elem.content} SentByMe={elem.sender == currentUser.id} />)}

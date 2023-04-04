@@ -16,9 +16,29 @@ export default function ChatPage () {
   const [message, setMessage] = useState('')
   const handleClick = async () => {
     const msg = message
+    // const checkedConnection = isNewConversation ? generateNewConversation().then((e) => setConnection(e)) : connection
+    // isNewConversation && generateNewConversation().then((e) => setConnection(e))
+    // const newConnection = isNewConversation ? generateNewConversation().then((e) => setConnection(e)) : null
+    const checkedConnection = isNewConversation ? await generateNewConversation() : connection
+    isNewConversation && setConnection(checkedConnection)
+    setIsNewConversation(false)
     setMessage('')
-    const { data, error } = await supabase.from('messages').insert({ content: msg, connection_id: connection.id })
+    const { data, error } = await supabase.from('messages').insert({ content: msg, connection_id: await checkedConnection.id })
+    // if (isNewConversation) {
+    //   const { data, error } = await supabase.from('messages').insert({ content: msg, connection_id: newConnection.id })
+    // } else {
+    //   const { data, error } = await supabase.from('messages').insert({ content: msg, connection_id: connection.id })
+    // }
+    // setIsNewConversation(false)
+    // setMessage('')
+    // const { data, error } = await supabase.from('messages').insert({ content: msg, connection_id: checkedConnection.id })
     // getChats().then((e) => setChats(e))
+  }
+
+  const generateNewConversation = async () => {
+    const { data, error } = await supabase.from('connections').insert({ member_1: currentUser.id, member_2: userData.id }).select().maybeSingle()
+    console.log(data)
+    return data
   }
 
   function SortByTime(a) {
@@ -29,8 +49,10 @@ export default function ChatPage () {
   }
 
   const [userData, setUserData] = useState()
-  const [chats, setChats] = useState()
+  const [chats, setChats] = useState([])
   const [connection, setConnection] = useState()
+  const [isNewConversation, setIsNewConversation] = useState(false)
+  const [watchForRealtimeChanges, setWatchForRealtimeChanges] = useState(false)
 
   const getUserDetails = async () => {
     const { error, data } = await supabase.from('profiles').select().eq('username', username.toLowerCase()).maybeSingle()
@@ -41,17 +63,30 @@ export default function ChatPage () {
     //TODO: i Will Change this Method to Something Optimized, coz it takes Time to get connection_id
     const Primary_data = async () => {
       const { error, data } = await supabase.from('connections').select().eq('member_1', userData.id).eq('member_2', currentUser.id).maybeSingle()
+      console.log('pri', {data, error})
       return data
     }
     const Secondary_data = async () => {
       const { error, data } = await supabase.from('connections').select().eq('member_2', userData.id).eq('member_1', currentUser.id).maybeSingle()
+      console.log('sec', {data, error})
       return data
     }
     // const { error, data } = await supabase.from('connections').select().eq('member_1', userData.id).eq('member_2', currentUser.id).maybeSingle()
     // const { error, data } = await supabase.from('connections').select().eq('member_2', userData.id).eq('member_1', currentUser.id).maybeSingle()
     // return Primary_data()
     // console.log(await Primary_data())
-    return (await Primary_data()) != null ? (await Primary_data()) : (await Secondary_data())
+
+    const pri = await Primary_data()
+    const sec = await Secondary_data()
+
+    if (pri != null) {
+      return pri
+    } else if (sec != null) {
+      return sec
+    } else {
+      setIsNewConversation(true)
+    }
+    // return (await Primary_data()) != null ? (await Primary_data()) : (await Secondary_data()) == null && setIsNewConversation(true)
   }
 
   const getChats = async () => {
@@ -70,9 +105,14 @@ export default function ChatPage () {
   }, [userData])
 
   useEffect(() => {
-    connection && getChats().then((e) => setChats(e))
+    connection && !isNewConversation && getChats().then((e) => {setChats(e); setWatchForRealtimeChanges(true);})
     connection && console.log('Connection', connection)
-  }, [connection])
+  }, [connection, isNewConversation])
+
+  useEffect(() => {
+    isNewConversation && console.log('this is newConvo')
+  }, [isNewConversation])
+  
 
   useEffect(() => {
     scrollToBottom()
@@ -82,12 +122,15 @@ export default function ChatPage () {
     const sub = supabase.channel('any')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
         console.log('Change received!', payload)
-        setChats((current) => [...current, payload.new])
+        // chats.includes(payload.new) && console.log('i already have', payload.new)
+        // console.log(chats)
+        // setChats((current) => [...current, payload.new])
+        watchForRealtimeChanges && setChats((current) => current.includes(payload.new) ? current : [...current, payload.new])
       }).subscribe()
     return () => {
       supabase.removeChannel(sub)
     }
-  }, [])
+  }, [watchForRealtimeChanges])
   
 
   // function reloadChats() {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { chakra, Heading, Container, Text, Input, InputGroup, InputRightElement, Button, Box, Flex, Spacer } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../../lib/supabaseClient'
@@ -8,8 +8,10 @@ import { IoSend } from 'react-icons/io5'
 
 export default function ChatPage () {
   const router = useRouter()
-  const { connection_id } = router.query
+  const { username } = router.query
   const { currentUser } = useAuth()
+  const messagesEndRef = useRef(null)
+  const scrollToBottom = () => {messagesEndRef.current?.scrollIntoView({behavior: "smooth"})}
   
   const [message, setMessage] = useState('')
   const handleClick = async () => {
@@ -31,11 +33,12 @@ export default function ChatPage () {
   const [connection, setConnection] = useState()
 
   const getUserDetails = async () => {
-    const { error, data } = await supabase.from('profiles').select().eq('username', connection_id).maybeSingle()
+    const { error, data } = await supabase.from('profiles').select().eq('username', username.toLowerCase()).maybeSingle()
     return data
   }
 
   const getConnection = async () => {
+    //TODO: i Will Change this Method to Something Optimized, coz it takes Time to get connection_id
     const Primary_data = async () => {
       const { error, data } = await supabase.from('connections').select().eq('member_1', userData.id).eq('member_2', currentUser.id).maybeSingle()
       return data
@@ -58,8 +61,8 @@ export default function ChatPage () {
   }
 
   useEffect(() => {
-    currentUser && connection_id && getUserDetails().then((e) => setUserData(e))
-  }, [currentUser, connection_id])
+    currentUser && username && getUserDetails().then((e) => setUserData(e))
+  }, [currentUser, username])
 
   useEffect(() => {
     userData && getConnection().then((e) => setConnection(e))
@@ -71,14 +74,30 @@ export default function ChatPage () {
     connection && console.log('Connection', connection)
   }, [connection])
 
-  function reloadChats() {
-    connection && getChats().then((e) => setChats(e))
-  }
+  useEffect(() => {
+    scrollToBottom()
+  }, [chats])
 
   useEffect(() => {
-    const interval = setInterval(() => reloadChats(), 1000);
-    return () => {clearInterval(interval)}
+    const sub = supabase.channel('any')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        console.log('Change received!', payload)
+        setChats((current) => [...current, payload.new])
+      }).subscribe()
+    return () => {
+      supabase.removeChannel(sub)
+    }
   }, [])
+  
+
+  // function reloadChats() {
+  //   connection && getChats().then((e) => setChats(e))
+  // }
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => reloadChats(), 1000);
+  //   return () => {clearInterval(interval)}
+  // }, [])
 
   return (<>
     {/* <Text width={'100%'} textAlign={'center'} pt={'15px'} fontSize={'14px'} lineHeight={'14px'} color={'#6B7280'}>Here You Will see your messages with @{connection_id}</Text> */}
@@ -86,7 +105,8 @@ export default function ChatPage () {
     <Container maxW='container.lg' position={'fixed'} height={'100%'} px={2} pt={'10'} pb={'64px'}>
       <Flex height={'100%'} direction={'column'} overflowY={'scroll'}>
         <Spacer />
-        {chats && SortByTime(chats).map((elem) => <Message Message={elem.content} SentByMe={elem.sender == currentUser.id} />)}
+        {chats && SortByTime(chats).map((elem) => <Message key={elem.id} Message={elem.content} SentByMe={elem.sender == currentUser.id} />)}
+        <div ref={messagesEndRef} />
       </Flex>
     </Container>
 

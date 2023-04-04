@@ -28,6 +28,7 @@ export default function Home() {
       <Flex justifyItems={'end'}>
         <Flex verticalAlign={'bottom'} width={'auto'} my={'auto'} mr={'8px'} flexGrow={1} flexShrink={1} flexBasis={'auto'}>
           <Text fontSize={'28px'} fontWeight={'semibold'}>Chat</Text>
+          <Text fontSize={'28px'} fontWeight={'semibold'}> - {currentUser?.user_metadata?.username}</Text>
         </Flex>
 
         <Flex height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' background={'#FCFCFD80'} rounded={'full'} overflow={'hidden'}>

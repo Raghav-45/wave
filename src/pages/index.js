@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel, Flex, Text, Spinner, Center, Box, Input, Button, Stack, VStack, HStack, InputGroup, InputLeftElement, useToast, AspectRatio, Image } from '@chakra-ui/react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/router'
@@ -9,7 +9,9 @@ import { FiSearch } from 'react-icons/fi'
 export default function Home() {
   const router = useRouter()
   const { currentUser, logout } = useAuth()
-  // const [currentUser, setCurrentUser] = useState()
+  const inputRef = useRef(null)
+  const [showSearchBox, setShowSearchBox] = useState(false)
+  const [SearchQuery, setSearchQuery] = useState('')
   const [userList, setUserList] = useState()
   const [isUserListLoading, setIsUserListLoading] = useState(true)
 
@@ -28,16 +30,17 @@ export default function Home() {
       <Flex justifyItems={'end'}>
         <Flex verticalAlign={'bottom'} width={'auto'} my={'auto'} mr={'8px'} flexGrow={1} flexShrink={1} flexBasis={'auto'}>
           <Text fontSize={'28px'} fontWeight={'semibold'}>Chat</Text>
-          <Text fontSize={'28px'} fontWeight={'semibold'}> - {currentUser?.user_metadata?.username}</Text>
+          {/* <Text fontSize={'28px'} fontWeight={'semibold'}> - {currentUser?.user_metadata?.username}</Text> */}
         </Flex>
 
-        <Flex height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' background={'#FCFCFD80'} rounded={'full'} overflow={'hidden'}>
-          <Box m={'auto'} mx={'11px'} color={'#130F26'}>
-            <FiSearch height={'18px'} width={'18px'} fontSize={'18px'} mr={'8px'} />
-          </Box>
+        <Flex onMouseEnter={(e) => setShowSearchBox(true)} onMouseLeave={(e) => setShowSearchBox(false)} height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' background={'#FCFCFD80'} rounded={'full'} overflow={'hidden'} style={{width: showSearchBox && '100%', flexGrow: showSearchBox && '1', transitionDuration: '0.2s', transitionTimingFunction: "cubic-bezier(.4,0,.2,1)"}}>
+          <Flex m={'auto'} mx={'11px'} color={'#130F26'}>
+            <FiSearch onClick={() => {inputRef.current.focus()}} height={'18px'} width={'18px'} fontSize={'18px'} />
+            <Input ref={inputRef} value={SearchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='@username' width={0} height={'18px'} p={0} pl={'8px'} focusBorderColor='#0000' errorBorderColor='#0000' style={{transitionDuration: '0.5s', transitionTimingFunction: "cubic-bezier(.4,0,.2,1)"}} borderWidth={0} flexGrow={1} flexShrink={1} flexBasis={'auto'}/>
+          </Flex>
         </Flex>
-        <Flex height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' rounded={'full'} overflow={'hidden'} ml={'8px'}>
-          <Image onClick={() => logout()} src={currentUser?.user_metadata?.photo_url ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'} alt='' objectFit='cover' />
+        <Flex onClick={() => logout()} height={'40px'} width={'40px'} borderWidth='1px' borderColor='#FCFCFD99' rounded={'full'} overflow={'hidden'} ml={'8px'} flexGrow={0} flexShrink={0} flexBasis={'auto'}>
+          <Image src={currentUser?.user_metadata?.photo_url ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'} alt='' objectFit='cover' />
         </Flex>
       </Flex>
 
